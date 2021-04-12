@@ -1,14 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
-using Api.DbContexts;
-using Api.Dto;
-using Api.Models;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using ReenbitTest2.DbContexts;
+using ReenbitTest2.Dto;
+using ReenbitTest2.Models;
+using ReenbitTest2.Services;
 
 namespace Api.Controllers
 {
@@ -16,49 +21,31 @@ namespace Api.Controllers
     [ApiController]
     public class AccountController : ControllerBase
     {
+        private readonly UserService userService;
 
-        private readonly UserManager<User> _userManager;
-        private readonly SignInManager<User> _signInManager;
-        private readonly ApplicationDbContext dbContext;
-
-        public AccountController(UserManager<User> userManager, SignInManager<User> signInManager, ApplicationDbContext dbContext)
+        public AccountController(UserService userService)
         {
-            _userManager = userManager;
-            _signInManager = signInManager;
-            this.dbContext = dbContext;
+            this.userService = userService;
         }
 
         [HttpGet]
-        public async Task<IEnumerable<User>> GetUsers()
+        //[Authorize(Policy = "ForUser")]
+        public async Task<ActionResult<string>> GetUsers()
         {
-            return await _signInManager.UserManager.Users.ToListAsync();
+            var user = User;
+            return User.Identity.Name;
         }
 
 
         [HttpPost("register")]
-        public async Task<ActionResult<User>> Register([FromBody] RegisterViewModel model)
+        public async Task<ActionResult<UserDto>> Register([FromBody] RegisterViewModel model)
         {
             if (ModelState.IsValid)
             {
-                User user = new User
+                var result = await userService.Register(model);
+                if(result != null)
                 {
-                    Email = model.Name,
-                    UserName = model.Name,
-                    
-                };
-                await dbContext.SaveChangesAsync();
-                var result = await _userManager.CreateAsync(user, model.Password);
-
-                if (result.Succeeded)
-                {
-                    return Ok();
-                }
-                else
-                {
-                    foreach (var error in result.Errors)
-                    {
-                        ModelState.AddModelError(string.Empty, error.Description);
-                    }
+                    return Ok(result);
                 }
             }
             return BadRequest(model);
@@ -71,34 +58,10 @@ namespace Api.Controllers
         {
             if (ModelState.IsValid)
             {
-                var user = await _userManager.FindByNameAsync(model.Name);
-                if (user == null)
+                var result = await userService.Login(model);
+                if (result != null)
                 {
-                    return BadRequest();
-                }
-
-                var isIdentical = await _userManager.CheckPasswordAsync(user, model.Password);
-                if (!isIdentical)
-                {
-                    return BadRequest();
-                }
-
-                var result =
-                    await _signInManager.PasswordSignInAsync(model.Name, model.Password, false, false);
-                if (result.Succeeded && await _userManager.IsEmailConfirmedAsync(await _userManager.FindByEmailAsync(model.Name)))
-                {
-                   
-                    var responce = new UserDto
-                    {
-                        Id = user.Id,
-                        Name = user.UserName
-                    };
-
-                    return Ok(responce);
-                }
-                else
-                {
-                    ModelState.AddModelError("", "Неправильный логин и (или) пароль");
+                    return Ok(result);
                 }
             }
             return Unauthorized();
@@ -108,12 +71,23 @@ namespace Api.Controllers
         [HttpGet("logout")]
         public async Task<IActionResult> Logout()
         {
-            var a = this.User;
-            // удаляем аутентификационные куки
-            await _signInManager.SignOutAsync();
+            await userService.Logout();
             return Ok();
         }
-      
+
+        private async Task Authenticate(User user)
+        {
+            // создаем один claim
+            var claims = new List<Claim>
+            {
+                new Claim("Type", "User")
+            };
+            // создаем объект ClaimsIdentity
+            ClaimsIdentity id = new ClaimsIdentity(claims, "ApplicationCookie", ClaimsIdentity.DefaultNameClaimType,
+                ClaimsIdentity.DefaultRoleClaimType);
+            // установка аутентификационных куки
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(id));
+        }
 
     }
 }

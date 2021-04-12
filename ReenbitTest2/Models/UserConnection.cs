@@ -5,12 +5,11 @@ using System.Threading.Tasks;
 
 namespace ReenbitTest2.Models
 {
-    public class Message
+    public class UserConnection
     {
         public Guid Id { get; set; }
         public string UserId { get; set; }
         public User User { get; set; }
-        public string Text { get; set; }
-        public DateTime DateTime { get; set; }
+        public string ConnectionString { get; set; }
     }
 }

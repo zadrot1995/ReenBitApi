@@ -1,12 +1,14 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using ReenbitTest2.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Api.Models
+namespace ReenbitTest2.Models
 {
     public class User: IdentityUser
     {
+        public List<UserConnection> ConnectionStrings { get; set; }
     }
 }

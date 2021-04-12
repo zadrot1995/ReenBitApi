@@ -5,8 +5,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Api.DbContexts;
-using Api.Models;
+using ReenbitTest2.DbContexts;
+using ReenbitTest2.Models;
 
 namespace Api.Controllers
 {

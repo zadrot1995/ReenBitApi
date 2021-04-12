@@ -10,8 +10,8 @@ using ReenbitTest2.DbContexts;
 namespace ReenbitTest2.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20210409154021_Init")]
-    partial class Init
+    [Migration("20210411211633_UserRefactor2")]
+    partial class UserRefactor2
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -239,6 +239,25 @@ namespace ReenbitTest2.Migrations
                     b.ToTable("AspNetUserTokens");
                 });
 
+            modelBuilder.Entity("ReenbitTest2.Models.UserConnection", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ConnectionString")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserConnections");
+                });
+
             modelBuilder.Entity("Api.Models.Message", b =>
                 {
                     b.HasOne("Api.Models.User", "User")
@@ -297,6 +316,20 @@ namespace ReenbitTest2.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("ReenbitTest2.Models.UserConnection", b =>
+                {
+                    b.HasOne("Api.Models.User", "User")
+                        .WithMany("ConnectionStrings")
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Api.Models.User", b =>
+                {
+                    b.Navigation("ConnectionStrings");
                 });
 #pragma warning restore 612, 618
         }

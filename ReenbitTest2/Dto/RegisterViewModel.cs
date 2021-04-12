@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Api.Dto
+namespace ReenbitTest2.Dto
 {
     public class RegisterViewModel
     {
