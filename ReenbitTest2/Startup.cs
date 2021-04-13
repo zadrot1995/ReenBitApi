@@ -39,6 +39,7 @@ namespace ReenbitTest2
             services.AddControllers();
             ConfigureIdentity(services);
             ConfigureCors(services);
+            services.AddSignalR();
             services.AddTransient<UserService>();
             services.AddTransient<ChatService>();
 
@@ -65,7 +66,7 @@ namespace ReenbitTest2
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
 
-            services.AddSignalR().AddMessagePackProtocol();
+            //services.AddSignalR().AddMessagePackProtocol();
 
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(options =>
@@ -115,11 +116,15 @@ namespace ReenbitTest2
 
             app.UseAuthentication();
             app.UseAuthorization();
+            app.UseWebSockets(new WebSocketOptions
+            {
+                KeepAliveInterval = TimeSpan.FromSeconds(120),
+            });
 
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
-                endpoints.MapHub<ChatHub>("/signalr");
+                endpoints.MapHub<ChatHub>("/hub/chat");
 
             });
         }

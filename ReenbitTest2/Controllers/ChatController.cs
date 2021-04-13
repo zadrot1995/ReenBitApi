@@ -34,18 +34,27 @@ namespace ReenbitTest2.Controllers
             this.chatService = chatService;
         }
 
+
+
         [HttpPost]
-        public async Task<IActionResult> SendMessage(ChatMessage message)
+        public async Task<IActionResult> CreateChat(ChatCreateDto chatCreateDto)
         {
-            try
+            if(chatCreateDto != null)
             {
-                await chatService.SendMessage(message);
+                var chat = new Chat { Name = chatCreateDto.Name, Users = new List<User>() };
+                foreach(var userId in chatCreateDto.UsersId)
+                {
+                    var user = await _signInManager.UserManager.FindByIdAsync(userId);
+                    if (user != null)
+                    {
+                        chat.Users.ToList().Add(user);
+                    }
+                }
+                await dbContext.Chats.AddAsync(chat);
+                await dbContext.SaveChangesAsync();
                 return Ok();
             }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            return BadRequest();
         }
 
         [HttpPost("newDevice")]

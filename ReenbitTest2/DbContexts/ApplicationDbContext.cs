@@ -10,9 +10,9 @@ namespace ReenbitTest2.DbContexts
 {
     public class ApplicationDbContext : IdentityDbContext<User>
     {
-        public DbSet<Message> Messages { get; set; }
         public DbSet<UserConnection> UserConnections { get; set; }
-        public ApplicationDbContext(DbContextOptions options) : base(options)
+        public DbSet<Chat> Chats { get; set; }
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
         }
     }
