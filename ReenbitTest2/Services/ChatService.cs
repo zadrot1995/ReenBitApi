@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 using ReenbitTest2.DbContexts;
 using ReenbitTest2.Dto;
 using ReenbitTest2.Hubs;
@@ -26,38 +27,39 @@ namespace ReenbitTest2.Services
             this.dbContext = dbContext;
         }
 
-        public async Task SendMessage(ChatMessage message)
+        public IEnumerable<string> GetConnectionsFromUser(IEnumerable<User> users)
         {
-            var user = this._userManager.Users.Where(x => x.Id == message.To).FirstOrDefault();
-            if (user != null)
+            List<string> chatConnections = new List<string>();
+
+            foreach (var u in users)
             {
-                //await this.hubContext.Clients.Clients(user.ConnectionStrings.Select(x => x.ConnectionString).ToList()).SendAsync("messageReceivedFromApi", message);
-                await this.hubContext.Clients.All.SendAsync("messageReceivedFromApi", message);
+                var connections = dbContext.UserConnections.Include(x => x.User).Where(x => x.UserId == u.Id);
+                if (connections != null)
+                {
+                    foreach (var connection in connections)
+                    {
+                        chatConnections.Add(connection.ConnectionString);
+
+                    }
+                }
             }
+            return chatConnections;
         }
 
-        public async Task<NewConnectionDto> AddNewConnection(NewConnectionDto newConnectionDto)
+        public async Task CreateUserConnection(HubCallerContext context , UserConnectDto userConnectDto)
         {
-            var connections = dbContext.UserConnections.Where(x => x.UserId == newConnectionDto.Id);
-            if (connections == null)
-            {
-                return null;
-            }
-            dbContext.UserConnections.Add(new Models.UserConnection { ConnectionString = newConnectionDto.ConnectionString, UserId = newConnectionDto.Id });
-            await dbContext.SaveChangesAsync();
-            return newConnectionDto;
-        }
+            var user = await _signInManager.UserManager.Users.Where(x => x.Id == userConnectDto.UserId).Include(x => x.ConnectionStrings).FirstOrDefaultAsync();
 
-        public async Task<NewConnectionDto> DeleteConnection(NewConnectionDto newConnectionDto)
-        {
-            var user = this._userManager.Users.Where(x => x.Id == newConnectionDto.Id).FirstOrDefault();
-            if (user != null)
+            if (user != null && await dbContext.UserConnections.Where(x => x.ConnectionString == context.ConnectionId).FirstOrDefaultAsync() == null)
             {
-                dbContext.UserConnections.Remove(dbContext.UserConnections.Where(x => x.ConnectionString == newConnectionDto.ConnectionString).FirstOrDefault());
+                user.ConnectionStrings.Add(new UserConnection { UserId = user.Id, User = user, ConnectionString = context.ConnectionId });
                 await dbContext.SaveChangesAsync();
-                return newConnectionDto;
             }
-            return null;
+
+            else
+            {
+                throw new Exception("The user is not exist!");
+            }
         }
 
     }

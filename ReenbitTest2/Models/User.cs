@@ -10,5 +10,6 @@ namespace ReenbitTest2.Models
     public class User: IdentityUser
     {
         public List<UserConnection> ConnectionStrings { get; set; }
+        public List<Chat> Chats { get; set; }
     }
 }

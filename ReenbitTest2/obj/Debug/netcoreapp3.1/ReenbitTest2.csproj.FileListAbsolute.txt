@@ -76,5 +76,8 @@ C:\Users\zadro\source\repos\ReenbitTest2\ReenbitTest2\bin\Debug\netcoreapp3.1\Sy
 C:\Users\zadro\source\repos\ReenbitTest2\ReenbitTest2\bin\Debug\netcoreapp3.1\System.Runtime.CompilerServices.Unsafe.dll
 C:\Users\zadro\source\repos\ReenbitTest2\ReenbitTest2\bin\Debug\netcoreapp3.1\System.Text.Encodings.Web.dll
 C:\Users\zadro\source\repos\ReenbitTest2\ReenbitTest2\bin\Debug\netcoreapp3.1\System.Text.Json.dll
+C:\Users\zadro\source\repos\ReenbitTest2\ReenbitTest2\bin\Debug\netcoreapp3.1\Microsoft.AspNetCore.JsonPatch.dll
+C:\Users\zadro\source\repos\ReenbitTest2\ReenbitTest2\bin\Debug\netcoreapp3.1\Microsoft.AspNetCore.Mvc.NewtonsoftJson.dll
+C:\Users\zadro\source\repos\ReenbitTest2\ReenbitTest2\bin\Debug\netcoreapp3.1\Newtonsoft.Json.Bson.dll
 C:\Users\zadro\source\repos\ReenbitTest2\ReenbitTest2\obj\Debug\netcoreapp3.1\ReenbitTest2.csproj.CoreCompileInputs.cache
 C:\Users\zadro\source\repos\ReenbitTest2\ReenbitTest2\obj\Debug\netcoreapp3.1\ReenbitTest2.MvcApplicationPartsAssemblyInfo.cache

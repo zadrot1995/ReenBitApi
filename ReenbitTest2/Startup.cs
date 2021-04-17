@@ -36,10 +36,9 @@ namespace ReenbitTest2
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers();
-            ConfigureIdentity(services);
+            services.AddControllers().AddNewtonsoftJson(options =>
+               options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore); ; ConfigureIdentity(services);
             ConfigureCors(services);
-            services.AddSignalR();
             services.AddTransient<UserService>();
             services.AddTransient<ChatService>();
 
@@ -66,7 +65,7 @@ namespace ReenbitTest2
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
 
-            //services.AddSignalR().AddMessagePackProtocol();
+            services.AddSignalR().AddMessagePackProtocol();
 
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(options =>
@@ -116,15 +115,15 @@ namespace ReenbitTest2
 
             app.UseAuthentication();
             app.UseAuthorization();
-            app.UseWebSockets(new WebSocketOptions
-            {
-                KeepAliveInterval = TimeSpan.FromSeconds(120),
-            });
+            //app.UseWebSockets(new WebSocketOptions
+            //{
+            //    KeepAliveInterval = TimeSpan.FromSeconds(120),
+            //});
 
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
-                endpoints.MapHub<ChatHub>("/hub/chat");
+                endpoints.MapHub<ChatHub>("/signalr");
 
             });
         }

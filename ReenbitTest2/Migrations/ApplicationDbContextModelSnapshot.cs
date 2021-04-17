@@ -19,6 +19,21 @@ namespace ReenbitTest2.Migrations
                 .HasAnnotation("ProductVersion", "5.0.5")
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+            modelBuilder.Entity("ChatUser", b =>
+                {
+                    b.Property<Guid>("ChatsId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("UsersId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("ChatsId", "UsersId");
+
+                    b.HasIndex("UsersId");
+
+                    b.ToTable("ChatUser");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
                     b.Property<string>("Id")
@@ -156,6 +171,9 @@ namespace ReenbitTest2.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("ChatType")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
@@ -170,11 +188,11 @@ namespace ReenbitTest2.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("ChatId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("ConnectionId")
+                    b.Property<string>("ChatId")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("ChatId1")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("DateTime")
                         .HasColumnType("datetime2");
@@ -182,12 +200,12 @@ namespace ReenbitTest2.Migrations
                     b.Property<string>("Text")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("To")
+                    b.Property<string>("UserId")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ChatId");
+                    b.HasIndex("ChatId1");
 
                     b.ToTable("ChatMessage");
                 });
@@ -199,9 +217,6 @@ namespace ReenbitTest2.Migrations
 
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
-
-                    b.Property<Guid?>("ChatId")
-                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
@@ -249,8 +264,6 @@ namespace ReenbitTest2.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ChatId");
-
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
 
@@ -279,6 +292,21 @@ namespace ReenbitTest2.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("UserConnections");
+                });
+
+            modelBuilder.Entity("ChatUser", b =>
+                {
+                    b.HasOne("ReenbitTest2.Models.Chat", null)
+                        .WithMany()
+                        .HasForeignKey("ChatsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ReenbitTest2.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("UsersId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -336,14 +364,7 @@ namespace ReenbitTest2.Migrations
                 {
                     b.HasOne("ReenbitTest2.Models.Chat", null)
                         .WithMany("Messages")
-                        .HasForeignKey("ChatId");
-                });
-
-            modelBuilder.Entity("ReenbitTest2.Models.User", b =>
-                {
-                    b.HasOne("ReenbitTest2.Models.Chat", null)
-                        .WithMany("Users")
-                        .HasForeignKey("ChatId");
+                        .HasForeignKey("ChatId1");
                 });
 
             modelBuilder.Entity("ReenbitTest2.Models.UserConnection", b =>
@@ -358,8 +379,6 @@ namespace ReenbitTest2.Migrations
             modelBuilder.Entity("ReenbitTest2.Models.Chat", b =>
                 {
                     b.Navigation("Messages");
-
-                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("ReenbitTest2.Models.User", b =>

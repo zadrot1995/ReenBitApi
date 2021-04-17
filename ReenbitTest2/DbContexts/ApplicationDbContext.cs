@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ReenbitTest2.Models;
 using System;
 using System.Collections.Generic;
@@ -15,5 +16,6 @@ namespace ReenbitTest2.DbContexts
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
         }
+
     }
 }
