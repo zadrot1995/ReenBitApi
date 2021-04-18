@@ -10,8 +10,8 @@ using ReenbitTest2.DbContexts;
 namespace ReenbitTest2.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20210417154748_init")]
-    partial class init
+    [Migration("20210418102101_Init")]
+    partial class Init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -173,6 +173,9 @@ namespace ReenbitTest2.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("AdminId")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("ChatType")
                         .HasColumnType("nvarchar(max)");
 
@@ -199,17 +202,23 @@ namespace ReenbitTest2.Migrations
                     b.Property<DateTime>("DateTime")
                         .HasColumnType("datetime2");
 
+                    b.Property<bool>("IsEdited")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Text")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserId")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("UserName")
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ChatId1");
 
-                    b.ToTable("ChatMessage");
+                    b.ToTable("ChatMessages");
                 });
 
             modelBuilder.Entity("ReenbitTest2.Models.User", b =>

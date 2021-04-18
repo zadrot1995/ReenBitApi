@@ -51,7 +51,7 @@ namespace ReenbitTest2.Controllers
                         .ToListAsync();
                     foreach (var chat in chats)
                     {
-                        chatDtos.Add(new ChatDto { Id = chat.Id.ToString(), Name = chat.Name, ChatType = chat.ChatType });
+                        chatDtos.Add(new ChatDto { Id = chat.Id.ToString(), Name = chat.Name, ChatType = chat.ChatType, AdminId = chat.AdminId});
                     }
                     return chatDtos;
                     
@@ -86,7 +86,7 @@ namespace ReenbitTest2.Controllers
         {
             if (chatCreateDto != null)
             {
-                var chat = new Chat { Name = chatCreateDto.Name, Users = new List<User>(), ChatType = chatCreateDto.ChatType };
+                var chat = new Chat { Name = chatCreateDto.Name, Users = new List<User>(), ChatType = chatCreateDto.ChatType, AdminId = chatCreateDto.AdminId };
                 foreach (var userId in chatCreateDto.UsersId)
                 {
                     var user = await _signInManager.UserManager.FindByIdAsync(userId);
@@ -97,7 +97,7 @@ namespace ReenbitTest2.Controllers
                 }
                 await dbContext.Chats.AddAsync(chat);
                 await dbContext.SaveChangesAsync();
-                var newChatDto = new ChatDto { Id = chat.Id.ToString(), ChatType = chatCreateDto.ChatType, Name = chat.Name };
+                var newChatDto = new ChatDto { Id = chat.Id.ToString(), ChatType = chatCreateDto.ChatType, Name = chat.Name, AdminId = chatCreateDto.AdminId };
                 await hubContext.Clients.Clients(chatService.GetConnectionsFromUser(chat.Users).ToList()).SendAsync("OnNewChatCreated",
                     new ChatDto { Id = chat.Id.ToString(), ChatType = chatCreateDto.ChatType, Name = chat.Name });
                 return Ok();

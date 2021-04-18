@@ -55,13 +55,11 @@ namespace ReenbitTest2.Hubs
                 throw ex;
             }
         }
-
-       
         public async Task CreateChat(ChatCreateDto chatCreateDto)
         {
             if (chatCreateDto != null)
             {
-                var chat = new Chat { Name = chatCreateDto.Name, Users = new List<User>(), ChatType = chatCreateDto.ChatType };
+                var chat = new Chat { Name = chatCreateDto.Name, Users = new List<User>(), ChatType = chatCreateDto.ChatType, AdminId = chatCreateDto.AdminId };
                 foreach (var userId in chatCreateDto.UsersId)
                 {
                     var user = await _signInManager.UserManager.FindByIdAsync(userId);
@@ -72,11 +70,88 @@ namespace ReenbitTest2.Hubs
                 }
                 await dbContext.Chats.AddAsync(chat);
                 await dbContext.SaveChangesAsync();
-                var newChatDto = new ChatDto { Id = chat.Id.ToString(), ChatType = chatCreateDto.ChatType, Name = chat.Name };
+                var newChatDto = new ChatDto { Id = chat.Id.ToString(), ChatType = chatCreateDto.ChatType, Name = chat.Name,  AdminId = chatCreateDto.AdminId };
                 await Clients.Clients(chatService.GetConnectionsFromUser(chat.Users).ToList()).OnNewChatConected(newChatDto);
             }
         }
+        public async Task EditMessageAsync(ChatMessage message)
+        {
+            List<string> chatConnections = new List<string>();
 
+            var chat = dbContext.Chats
+                .Include(x => x.Users)
+                .Where(x => x.Id.ToString() == message.ChatId)
+                .FirstOrDefault();
+            var editingMessage = dbContext.ChatMessages.Where(x => x.Id == message.Id).FirstOrDefault();
+            if(editingMessage != null)
+            {
+                editingMessage.Text = message.Text;
+                editingMessage.IsEdited = true;
+                editingMessage.DateTime = DateTime.Now;
+            }
+            await dbContext.SaveChangesAsync();
+            if (chat != null)
+            {
+                await Clients.Clients(chatService.GetConnectionsFromUser(chat.Users).ToList()).EditMessage(message);
+            }
+        }
+
+        public async Task EditChatAsync(ChatDto chatDto)
+        {
+            List<string> chatConnections = new List<string>();
+
+            var chat = dbContext.Chats
+                .Include(x => x.Users)
+                .Where(x => x.Id.ToString() == chatDto.Id)
+                .FirstOrDefault();
+
+            if (chat != null)
+            {
+                chat.Name = chatDto.Name;
+            }
+            await dbContext.SaveChangesAsync();
+
+            if (chat != null)
+            {
+                await Clients.Clients(chatService.GetConnectionsFromUser(chat.Users).ToList()).EditChat(chatDto);
+            }
+        }
+
+
+
+        public async Task DeleteMessageAsync(ChatMessage message)
+        {
+            List<string> chatConnections = new List<string>();
+
+            var chat = dbContext.Chats
+                .Include(x => x.Users)
+                .Where(x => x.Id.ToString() == message.ChatId)
+                .FirstOrDefault();
+            var DeletingMessage = dbContext.ChatMessages.Where(x => x.Id == message.Id).FirstOrDefault();
+            if (DeletingMessage != null)
+            {
+                dbContext.ChatMessages.Remove(DeletingMessage);
+            }
+            await dbContext.SaveChangesAsync();
+            if (chat != null)
+            {
+                await Clients.Clients(chatService.GetConnectionsFromUser(chat.Users).ToList()).DeleteMessage(message);
+            }
+
+        }
+
+        public async Task OnUserLeaveAsync(string userId, string chatId)
+        {
+            if (userId != null && chatId != null)
+            {
+                var chat = await dbContext.Chats.Include(x => x.Users).Where(x => x.Id.ToString() == chatId).FirstOrDefaultAsync();
+                var user = await dbContext.Users.Where(x => x.Id == userId).FirstOrDefaultAsync();
+                chat.Users.Remove(user);
+                await dbContext.SaveChangesAsync();
+                await Clients.Clients(chatService.GetConnectionsFromUser(chat.Users).ToList()).OnUserLeave(chatId, userId);
+
+            }
+        }
 
         public override async Task OnConnectedAsync()
         {
@@ -86,15 +161,26 @@ namespace ReenbitTest2.Hubs
         {
             return base.OnDisconnectedAsync(exception);
         }
+
+
     }
 
     public interface IChatHub
     {
         Task MessageReceivedFromHub(ChatMessage message);
 
+        Task EditChat(ChatDto chat);
+
+        Task EditMessage(ChatMessage message);
+
+        Task DeleteMessage(ChatMessage message);
+
+        Task OnUserLeave(string chatId, string userId);
+
         Task OnNewChatConected(ChatDto chatDto);
 
         Task NewUserConnected(string message);
+
     }
     
 }

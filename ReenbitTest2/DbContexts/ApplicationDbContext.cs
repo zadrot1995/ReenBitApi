@@ -13,6 +13,8 @@ namespace ReenbitTest2.DbContexts
     {
         public DbSet<UserConnection> UserConnections { get; set; }
         public DbSet<Chat> Chats { get; set; }
+        public DbSet<ChatMessage> ChatMessages { get; set; }
+
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
         }
